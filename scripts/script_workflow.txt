@@ -15,30 +15,35 @@ sudox cmip7
 ########################
 
 cd /glade/work/cmip7/cesm_tags/
+cesmtag=cesm3_0_alpha07d
+casename=b.e30_${cesmtag:(-8)}.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
 
-# get the cesm tag
-git clone https://github.com/ESCOMP/cesm cesm3_0_alpha07d
-cd cesm3_0_alpha07d
+# clone the repo and get the cesm tag
+git clone https://github.com/ESCOMP/cesm $cesmtag -b $cesmtag
+cd $cesmtag
 
-# check out the tag
-git checkout  cesm3_0_alpha07d
+# check out the components
 ./bin/git-fleximod update
+
+###############################################
+## Update the ccs_config to the workflow branch
+###############################################
+cd ccs_config
+git checkout cmip7_workflow
+
 
 ########################
 ## Create new case
 ########################
-cd /glade/work/cmip7/cesm_tags/cesm3_0_alpha07d/cime/scripts
+cd /glade/work/cmip7/cesm_tags/${cesmtag}/cime/scripts
 ./create_newcase --compset B1850C_LTso --res ne30pg3_t232_wg37 \
---case /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  \
---run-unsupported  --project CESM0024
-
-# ***** TO DO *****
-# jim will create something like --workflow   
+--case /glade/u/home/cmip7/cases/${casename}  \
+--run-unsupported  --project CESM0024 --workflow cmip7
 
 ########################
 ## Set up 
 ########################
-cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  
+cd /glade/u/home/cmip7/cases/${casename}  
 /bin/cp /glade/campaign/cesm/cesmdata/cseg/runs/cesm2_0/b.e30_beta06.B1850C_LTso.ne30_t232_wgx3.166/env_mach_pes.xml .
 ./case.setup
 
@@ -57,7 +62,7 @@ cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-tes
 # needs to have usermods_dirs CMIP6_B1850 
 # ./create_newcase --user-mods-dir /glade/work/cmip7/cesm_tags/cesm3.0-alphabranch/components/cam/cime_config/usermods_dirs/CMIP6_B1850
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/${casename}
 
 ### user_nl_cam
 
@@ -121,7 +126,7 @@ fincl4 = 'QREFHT', 'PRECT', 'SNOW', 'PS', 'FLDS', 'FSDS', 'TREFHT', 'RHREFHT', '
 EOF
 
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/${casename}
 
 cat <<EOF>! user_nl_clm
 reseed_dead_plants = .true.
@@ -133,20 +138,20 @@ histaux_l2x1yrg = .true.
 EOF
 
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  
+cd /glade/u/home/cmip7/cases/${casename}  
 cat <<EOF>! user_nl_cice
 EOF
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/${casename}
 cat <<EOF>! user_nl_mom
 EOF
 
 
-mkdir -p /glade/derecho/scratch/hannay/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001/run/INPUT
-cd /glade/derecho/scratch/hannay/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001/run/INPUT
+mkdir -p /glade/derecho/scratch/hannay/${casename}/run/INPUT
+cd /glade/derecho/scratch/hannay/${casename}/run/INPUT
 ln -s /glade/derecho/scratch/gmarques/for_cecile/198/INPUT/* .
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/${casename}
 ./preview_namelists
 
 
@@ -171,7 +176,7 @@ RIght now Jim needs to separate all the time frequency (monthly, daily, etc) in 
 ## build and submit
 ########################
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/${casename}
 ./xmlchange JOB_PRIORITY=regular
 ./xmlchange PROJECT=CESM0023,RESUBMIT=2,STOP_N=4,STOP_OPTION=nyears
 ./xmlchange REST_OPTION=nyears,REST_N=1
