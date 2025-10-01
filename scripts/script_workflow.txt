@@ -29,7 +29,7 @@ cd $cesmtag
 ## Update the ccs_config to the workflow branch
 ###############################################
 cd ccs_config
-git checkout cmip7_workflow
+git checkout add_cmip7_workflow_amon_basic
 
 
 ########################
