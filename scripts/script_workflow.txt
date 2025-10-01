@@ -1,6 +1,6 @@
 
 # ======================================================
-# b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+# b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
 # ====================================================== 
 
 # This is not a script yet. This is a starting point to develop the script and identify the missing steps.
@@ -13,27 +13,23 @@ sudox cmip7
 ########################
 ## Clone the repository
 ########################
-cd /glade/u/home/cmip7/cesm_tags
+
+cd /glade/work/cmip7/cesm_tags/
 
 # get the cesm tag
-git clone https://github.com/ESCOMP/cesm cesm3_0_alpha07c
-cd cesm3_0_alpha07c
+git clone https://github.com/ESCOMP/cesm cesm3_0_alpha07d
+cd cesm3_0_alpha07d
 
 # check out the tag
-git checkout  cesm3_0_alpha07c
+git checkout  cesm3_0_alpha07d
 ./bin/git-fleximod update
-
-
-# ***** TO DO *****
-# cesm3_0_alpha07c doesn't have everything we need. We need to wait for  cesm3_0_alpha07d
-# we want to put the tags in: /glade/work/cmip7/cesm_tags instead of /glade/u/home/cmip7/cesm_tags 
 
 ########################
 ## Create new case
 ########################
-cd /glade/u/home/cmip7/cesm_tags/cesm3_0_alpha07c/cime/scripts
+cd /glade/work/cmip7/cesm_tags/cesm3_0_alpha07d/cime/scripts
 ./create_newcase --compset B1850C_LTso --res ne30pg3_t232_wg37 \
---case /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  \
+--case /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  \
 --run-unsupported  --project CESM0024
 
 # ***** TO DO *****
@@ -42,7 +38,7 @@ cd /glade/u/home/cmip7/cesm_tags/cesm3_0_alpha07c/cime/scripts
 ########################
 ## Set up 
 ########################
-cd /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  
+cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  
 /bin/cp /glade/campaign/cesm/cesmdata/cseg/runs/cesm2_0/b.e30_beta06.B1850C_LTso.ne30_t232_wgx3.166/env_mach_pes.xml .
 ./case.setup
 
@@ -61,7 +57,7 @@ cd /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-tes
 # needs to have usermods_dirs CMIP6_B1850 
 # ./create_newcase --user-mods-dir /glade/work/cmip7/cesm_tags/cesm3.0-alphabranch/components/cam/cime_config/usermods_dirs/CMIP6_B1850
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
 
 ### user_nl_cam
 
@@ -167,7 +163,7 @@ srf_emis_specifier = 'bc_a4 -> /glade/campaign/acom/MUSICA/emis/cmip7/ne30/CEDS-
 EOF
 
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
 
 cat <<EOF>! user_nl_clm
 fsurdat = '/glade/campaign/cesm/cesmdata/inputdata/lnd/clm2/surfdata_esmf/ctsm5.3.0/surfdata_ne30np4.pg3_hist_1850_78pfts_c240908.nc'
@@ -182,20 +178,20 @@ histaux_l2x1yrg = .true.
 EOF
 
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  
+cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001  
 cat <<EOF>! user_nl_cice
 EOF
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
 cat <<EOF>! user_nl_mom
 EOF
 
 
-mkdir -p /glade/derecho/scratch/hannay/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001/run/INPUT
-cd /glade/derecho/scratch/hannay/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001/run/INPUT
+mkdir -p /glade/derecho/scratch/hannay/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001/run/INPUT
+cd /glade/derecho/scratch/hannay/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001/run/INPUT
 ln -s /glade/derecho/scratch/gmarques/for_cecile/198/INPUT/* .
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
 ./preview_namelists
 
 
@@ -220,7 +216,7 @@ RIght now Jim needs to separate all the time frequency (monthly, daily, etc) in 
 ## build and submit
 ########################
 
-cd /glade/u/home/cmip7/cases/b.e30_alpha07c.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
+cd /glade/u/home/cmip7/cases/b.e30_alpha07d.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.001
 ./xmlchange JOB_PRIORITY=regular
 ./xmlchange PROJECT=CESM0023,RESUBMIT=2,STOP_N=4,STOP_OPTION=nyears
 ./xmlchange REST_OPTION=nyears,REST_N=1
