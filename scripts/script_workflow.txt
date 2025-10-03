@@ -147,8 +147,8 @@ cat <<EOF>! user_nl_mom
 EOF
 
 
-mkdir -p /glade/derecho/scratch/hannay/${casename}/run/INPUT
-cd /glade/derecho/scratch/hannay/${casename}/run/INPUT
+mkdir -p $SCRATCH/${casename}/run/INPUT
+cd $SCRATCH/${casename}/run/INPUT
 ln -s /glade/derecho/scratch/gmarques/for_cecile/198/INPUT/* .
 
 cd /glade/u/home/cmip7/cases/${casename}
