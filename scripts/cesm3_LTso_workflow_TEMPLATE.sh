@@ -1,4 +1,4 @@
-2!/bin/bash
+#!/bin/bash
 
 # ======================================================
 # CMIP7 LTso TEMPLATE SCRIPT
