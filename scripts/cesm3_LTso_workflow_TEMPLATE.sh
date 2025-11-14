@@ -16,22 +16,12 @@ useresoln=ne30_t232_wgx3
 #casedir=/glade/u/home/cmip7/cases/
 casedir=/glade/derecho/scratch/nanr/workflow_testcase/
 rundir=/glade/derecho/scratch/nanr/workflow_testrun/
-#tagroot=/glade/work/cmip7/cesm_tags/
-#tagroot=/glade/derecho/scratch/nanr/cesm_tags/
+
 CODE_ROOT=/glade/derecho/scratch/nanr/cesm_tags/
+CASENAME=b.e30_${cesmtag:(-8)}.${compset}.${useresoln}.cmip7-testing.006
+CASEROOT=$casedir/$CASENAME
 
-casename=b.e30_${cesmtag:(-8)}.${compset}.${useresoln}.cmip7-testing.004
-
-########################
-## Directories
-########################
-CASE_ROOT=$casedir/$casename
-CASE_SCRIPTS_DIR=${CASE_ROOT}
-#CASE_BUILD_DIR=${CASE_ROOT}/build
-#CASE_ARCHIVE_DIR=${CASE_ROOT}/archive
-#CASE_RUN_DIR=${CASE_ROOT}/run
-
-echo "creating $casename"
+echo "creating $CASENAME"
 
 ########################
 ## Set flags to do stuff ----
@@ -105,36 +95,46 @@ fi
 if [[ $do_create_newcase != true ]]; then
      echo $'\n----- Skipping create_newcase -----\n'
 else
-    path=${casedir}/${casename}
+    path=${CASEROOT}
     if [ -d "${path}" ]; then
         echo "ERROR: CASE Directory already exists. Not overwriting"
         exit 20
     fi
 
     ${CODE_ROOT}/${cesmtag}/cime/scripts/create_newcase \
-        --case ${CASE_ROOT}  \
+        --case ${CASEROOT}  \
         --compset ${compset} \
 	--res ${resolution} \
         --run-unsupported  \
 	--project ${project} 
 	#--workflow cmip7
-     ###--run-unsupported  --project ${project} --workflow cmip7
 fi
+
+########################
+## copy script to CASEROOT directory
+########################
+SCRIPT_PATH="$(readlink -f "$0")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
+DATESTAMP="$(date +%Y%m%d)"
+USE_NAME="${SCRIPT_NAME}-${DATESTAMP}"
+
+mkdir -p "${CASEROOT}/provenance_script"
+cp "$SCRIPT_PATH" "${CASEROOT}/provenance_script/$USE_NAME"
 
 ########################
 ## add to github repo
 ########################
 if [[ $do_git_archive == true ]]; then
-    cd ${CASE_ROOT}  
+    cd ${CASEROOT}  
+    cp $curdir
     ./xmlchange CASE_GIT_REPOSITORY=git@github.com:NCAR/cesm_dev.git
 fi
 
 ########################
 ## Set up 
 ########################
-#cd ${casedir}/${casename}  
-#./xmlchange CIME_OUTPUT_ROOT=/glade/derecho/scratch/nanr/workflow_testrun/
-cd ${CASE_ROOT}
+cd ${CASEROOT}
 ./case.setup
 
 ########################
@@ -148,7 +148,7 @@ cd ${CASE_ROOT}
 # needs to have usermods_dirs CMIP6_B1850 
 # ./create_newcase --user-mods-dir /glade/work/cmip7/cesm_tags/cesm3.0-alphabranch/components/cam/cime_config/usermods_dirs/CMIP6_B1850
 
-cd ${CASE_ROOT}
+cd ${CASEROOT}
 
 ########################
 ## user_nl_cam
@@ -284,12 +284,11 @@ cat <<EOF> user_nl_mom
 EOF
 
 
-mkdir -p $SCRATCH/${casename}/run/INPUT
-cd $SCRATCH/${casename}/run/INPUT
+mkdir -p $SCRATCH/${CASENAME}/run/INPUT
+cd $SCRATCH/${CASENAME}/run/INPUT
 ln -s /glade/derecho/scratch/gmarques/for_cecile/198/INPUT/* .
 
-#cd /glade/u/home/cmip7/cases/${casename}
-cd $CASE_ROOT
+cd $CASEROOT
 ./preview_namelists
 
 
@@ -324,30 +323,16 @@ fi
 ## build and submit
 ########################
 
-cd ${CASE_ROOT}
+cd ${CASEROOT}
 ./xmlchange JOB_PRIORITY=premium
 ./xmlchange PROJECT=${project},RESUBMIT=2,STOP_N=4,STOP_OPTION=nyears
 ./xmlchange REST_OPTION=nyears,REST_N=1
 ./xmlchange JOB_WALLCLOCK_TIME=12:00:00  --subgroup case.run
 
-###############################
-## Setup CIME directories
-###############################
-#./xmlchange CIME_OUTPUT_ROOT=${CASE_RUN_DIR}
-#./xmlchange EXEROOT=${CASE_BUILD_DIR}
-#./xmlchange RUNDIR=${CASE_RUN_DIR}
-#./xmlchange CIME_OUTPUT_ROOT=$case_run_dir
-#./xmlchange RUNDIR=$case_run_dir
-#./xmlchange EXEROOT=$case_bld_dir
-###env_run.xml:    <entry id="RUNDIR" value="$CIME_OUTPUT_ROOT/$CASE/run">
-###env_run.xml:    <entry id="DOUT_S_ROOT" value="$CIME_OUTPUT_ROOT/archive/$CASE">
-
 if [[ $do_case_build == true ]]; then
-   ## => Build case
    qcmd -A ${project} -- ./case.build
 fi
 if [[ $do_case_submit == true ]]; then
-   ## => submit case
    ./case.submit
 fi
 
