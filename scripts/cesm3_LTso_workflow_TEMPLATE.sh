@@ -15,7 +15,7 @@ resolution=ne30pg3_t232_wg37
 useresoln=ne30_t232_wgx3
 #casedir=/glade/u/home/cmip7/cases/
 casedir=/glade/derecho/scratch/nanr/workflow_testcase/
-rundir=/glade/derecho/scratch/nanr/workflow_testrun/
+git_repo=git@github.com:NCAR/cesm_dev.git
 
 CODE_ROOT=/glade/derecho/scratch/nanr/cesm_tags/
 CASENAME=b.e30_${cesmtag:(-8)}.${compset}.${useresoln}.cmip7-testing.006
@@ -43,6 +43,13 @@ do_cmor=false
 do_hr3=true
 do_hr6=true
 do_dy=true
+
+########################
+## Set run instructions
+########################
+stop_n=5
+stop_option=nyears
+resubmit=10
 
 ########################
 ## connect as cmip7 user
@@ -81,11 +88,13 @@ else
      # check out the components
      ./bin/git-fleximod update
 
+     ### START ----- Remove when we are in production
      ###############################################
      ## Update the ccs_config to the workflow branch
      ###############################################
      cd ccs_config
      git checkout add_cmip7_workflow_amon_basic
+     ### END ----- Remove when we are in production
 
 fi
 
@@ -104,10 +113,10 @@ else
     ${CODE_ROOT}/${cesmtag}/cime/scripts/create_newcase \
         --case ${CASEROOT}  \
         --compset ${compset} \
+	--workflow cmip7 \
 	--res ${resolution} \
         --run-unsupported  \
 	--project ${project} 
-	#--workflow cmip7
 fi
 
 ########################
@@ -274,9 +283,18 @@ cat <<EOF> user_nl_mom
 EOF
 
 
+########################
+## START TEMPORARY SECTION
+## won't need by the time we are in production
+###---------------------
+
 mkdir -p $SCRATCH/${CASENAME}/run/INPUT
 cd $SCRATCH/${CASENAME}/run/INPUT
 ln -s /glade/derecho/scratch/gmarques/for_cecile/198/INPUT/* .
+
+###---------------------
+## END TEMP SECTION
+#########################33
 
 cd $CASEROOT
 ./preview_namelists
@@ -287,7 +305,8 @@ cd $CASEROOT
 if [[ $do_git_archive == true ]]; then
     cd ${CASEROOT}  
     cp $curdir
-    ./xmlchange CASE_GIT_REPOSITORY=git@github.com:NCAR/cesm_dev.git
+    ./xmlchange CASE_GIT_REPOSITORY=$git_repo
+
 fi
 
 ########################
@@ -302,8 +321,8 @@ fi
 ## CUPID
 ########################
 if [[ $do_cupid == true ]]; then
-   ## => Cupid
    echo "do_cupid == $do_cupid"
+   ./xmlchange RUN_POSTPROCESSING=TRUE
 fi
 
 
@@ -315,17 +334,14 @@ if [[ $do_cmor == true ]]; then
    echo "do_cmor == $do_cmor"
 fi
 
-## Right now Jim needs to separate all the time frequency (monthly, daily, etc) in different directories. 
-
 ########################
 ## build and submit
 ########################
 
 cd ${CASEROOT}
 ./xmlchange JOB_PRIORITY=premium
-./xmlchange PROJECT=${project},RESUBMIT=2,STOP_N=4,STOP_OPTION=nyears
+./xmlchange RESUBMIT=${resubmit},STOP_N=${stop_n},STOP_OPTION=${stop_option}
 ./xmlchange REST_OPTION=nyears,REST_N=1
-./xmlchange JOB_WALLCLOCK_TIME=12:00:00  --subgroup case.run
 
 if [[ $do_case_build == true ]]; then
    qcmd -A ${project} -- ./case.build
