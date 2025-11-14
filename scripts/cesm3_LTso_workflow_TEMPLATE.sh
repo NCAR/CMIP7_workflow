@@ -116,20 +116,10 @@ fi
 SCRIPT_PATH="$(readlink -f "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
-DATESTAMP="$(date +%Y%m%d)"
-USE_NAME="${SCRIPT_NAME}-${DATESTAMP}"
 
 mkdir -p "${CASEROOT}/provenance_script"
-cp "$SCRIPT_PATH" "${CASEROOT}/provenance_script/$USE_NAME"
+cp "$SCRIPT_PATH" "${CASEROOT}/provenance_script/$SCRIPT_NAME"
 
-########################
-## add to github repo
-########################
-if [[ $do_git_archive == true ]]; then
-    cd ${CASEROOT}  
-    cp $curdir
-    ./xmlchange CASE_GIT_REPOSITORY=git@github.com:NCAR/cesm_dev.git
-fi
 
 ########################
 ## Set up 
@@ -291,6 +281,14 @@ ln -s /glade/derecho/scratch/gmarques/for_cecile/198/INPUT/* .
 cd $CASEROOT
 ./preview_namelists
 
+########################
+## add to github repo
+########################
+if [[ $do_git_archive == true ]]; then
+    cd ${CASEROOT}  
+    cp $curdir
+    ./xmlchange CASE_GIT_REPOSITORY=git@github.com:NCAR/cesm_dev.git
+fi
 
 ########################
 ## timeseries
