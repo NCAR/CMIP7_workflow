@@ -14,11 +14,11 @@ compset=B1850C_LTso
 resolution=ne30pg3_t232_wg37
 useresoln=ne30_t232_wgx3
 #casedir=/glade/u/home/cmip7/cases/
-casedir=/glade/derecho/scratch/nanr/workflow_testcase/
+casedir=$SCRATCH/workflow_testcase/
 git_repo=git@github.com:NCAR/cesm_dev.git
 
-CODE_ROOT=/glade/derecho/scratch/nanr/cesm_tags/
-CASENAME=b.e30_${cesmtag:(-8)}.${compset}.${useresoln}.cmip7-testing.006
+CODE_ROOT=$SCRATCH/cesm_tags/
+CASENAME=b.e30_${cesmtag:(-8)}.${compset}.${useresoln}.cmip7-testing.007
 CASEROOT=$casedir/$CASENAME
 
 echo "creating $CASENAME"
@@ -28,12 +28,12 @@ echo "creating $CASENAME"
 ########################
 do_sudox=false
 do_git_archive=false
-do_download_code=false
+do_download_code=true
 do_create_newcase=true
 do_case_setup=true
 do_case_build=false
 do_case_submit=false
-do_tseries=false
+do_tseries=true
 do_cupid=false
 do_cmor=false
 
@@ -67,19 +67,15 @@ fi
 ########################
 ## Clone the repository
 ########################
+path=${CODE_ROOT}/${cesmtag}
 
-if [[ $do_download_code != true ]]; then
+if [[ $do_download_code != true || -d "${path}" ]]; then
      echo $'\n----- Skipping code download -----\n'
 else
-
+     mkdir -p ${CODE_ROOT}
      echo $'\n----- Downloading CESMROOT -----\n'
-     path=${CODE_ROOT}/${cesmtag}
-     if [ -d "${path}" ]; then
-        echo "ERROR: CESMROOT Directory already exists. Not overwriting"
-        exit 20
-     fi
 
-     cd $path
+     cd ${CODE_ROOT}
 
      # clone the repo and get the cesm tag
      git clone https://github.com/ESCOMP/cesm $cesmtag -b $cesmtag
@@ -109,8 +105,10 @@ else
         echo "ERROR: CASE Directory already exists. Not overwriting"
         exit 20
     fi
-    if [[ $do_cmor == true || $do_timeseries == true ]]; then
-        add_workflow = "--workflow cmip7"
+    if [[ $do_cmor == true || $do_tseries == true ]]; then
+        add_workflow="--workflow cmip7"
+    else
+        add_workflow=""
     fi
     ${CODE_ROOT}/${cesmtag}/cime/scripts/create_newcase \
         --case ${CASEROOT}  \
@@ -151,13 +149,15 @@ cd ${CASEROOT}
 
 # Edit each of the cmip7 workflow scripts to specify options to skip cmor or timeseries generation
 # if both are false these files won't exist in the case directory
-cmfiles=(".amon", ".Lmon")
+cmfiles=(".amon" ".lmon")
 for f in "${cmfiles[@]}"; do
   if [[ -f "$f" ]]; then
       if [[ $do_cmor == false ]]; then
+          echo "add skip-cmor option in $f"
           sed -i 's/--caseroot/--skip-cmor --caseroot/g' "$f"
       fi
-      if [[ $do_timeseries == false ]]; then
+      if [[ $do_tseries == false ]]; then
+          echo "add skip-timeseries option in $f"
           sed -i 's/--caseroot/--skip-timeseries --caseroot/g' "$f"
       fi
   fi
