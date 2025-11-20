@@ -109,11 +109,13 @@ else
         echo "ERROR: CASE Directory already exists. Not overwriting"
         exit 20
     fi
-
+    if [[ $do_cmor == true || $do_timeseries == true ]]; then
+        add_workflow = "--workflow cmip7"
+    fi
     ${CODE_ROOT}/${cesmtag}/cime/scripts/create_newcase \
         --case ${CASEROOT}  \
         --compset ${compset} \
-	--workflow cmip7 \
+	$add_workflow        \
 	--res ${resolution} \
         --run-unsupported  \
 	--project ${project} 
@@ -147,7 +149,20 @@ cd ${CASEROOT}
 # needs to have usermods_dirs CMIP6_B1850 
 # ./create_newcase --user-mods-dir /glade/work/cmip7/cesm_tags/cesm3.0-alphabranch/components/cam/cime_config/usermods_dirs/CMIP6_B1850
 
-cd ${CASEROOT}
+# Edit each of the cmip7 workflow scripts to specify options to skip cmor or timeseries generation
+# if both are false these files won't exist in the case directory
+cmfiles=(".amon", ".Lmon")
+for f in "${cmfiles[@]}"; do
+  if [[ -f "$f" ]]; then
+      if [[ $do_cmor == false ]]; then
+          sed -i 's/--caseroot/--skip-cmor --caseroot/g' "$f"
+      fi
+      if [[ $do_timeseries == false ]]; then
+          sed -i 's/--caseroot/--skip-timeseries --caseroot/g' "$f"
+      fi
+  fi
+done
+      
 
 ########################
 ## user_nl_cam
