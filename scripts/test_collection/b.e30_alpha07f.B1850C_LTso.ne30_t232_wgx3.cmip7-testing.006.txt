@@ -1,0 +1,128 @@
+
+# ======================================================
+# b.e30_alpha07f.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.006
+# ====================================================== 
+
+# This is not a script yet. This is a starting point to develop the script and identify the missing steps.
+
+########################
+## connect as cmip7 user
+########################
+sudox cmip7
+
+########################
+## settings for this run 
+########################
+cesmtag=cesm3_0_alpha07f
+casename=b.e30_${cesmtag:(-8)}.B1850C_LTso.ne30_t232_wgx3.cmip7-testing.006
+
+########################
+## Clone the repository
+## Update the ccs_config to the workflow branch
+########################
+
+cd /glade/work/cmip7/cesm_tags/
+# clone the repo and get the cesm tag
+git clone https://github.com/ESCOMP/cesm $cesmtag -b $cesmtag
+cd $cesmtag
+
+# check out the components
+./bin/git-fleximod update
+
+# Update the ccs_config to the workflow branch
+cd ccs_config
+git checkout add_cmip7_workflow_amon_basic
+
+# Needed to do a git pull because the branch was updated. 
+
+
+########################
+## Create new case
+########################
+cd /glade/work/cmip7/cesm_tags/${cesmtag}/cime/scripts
+./create_newcase --compset B1850C_LTso --res ne30pg3_t232_wg37 \
+--case /glade/u/home/cmip7/cases/testing/${casename}  \
+--run-unsupported  --project CESM0024 --workflow cmip7
+
+########################
+## Set up 
+########################
+cd /glade/u/home/cmip7/cases/testing/${casename}  
+cp /glade/campaign/cesm/cesmdata/cseg/runs/cesm2_0/b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.245/env_mach_pes.xml . 
+./case.setup
+./xmlchange CASE_GIT_REPOSITORY=git@github.com:NCAR/cesm_dev.git
+
+
+# ***** TO DO *****
+# we may want to get a better pe_layout out of the box 
+# /glade/campaign/cesm/cesmdata/cseg/runs/cesm2_0/b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.245/env_mach_pes.xml
+
+########################
+## namelists
+########################
+# here the variables that are on Gary's list but don't exist in our current compset:
+AOA1, AOA_NH, AODdnDUST1, AODdnDUST2, AODdnDUST3, BRY, C2H6, C3H6, C3H8, CH2O, CH3COCH3, CLDICECON, CLDICESTR, CLDLIQCON, CLDLIQSTR, CLDLOW_CAL, CLDMED_CAL, CLD_CAL, CLD_MISR, CLDTOT_CAL, CLDTOT_ISCCP, CLY, CMFDQ, CMFDT, CMFMCDZM, CO, CO_CHML, DF_ALKNIT, DF_HNO3, DF_HO2NO2, DF_HONITR, DF_ISOPNITA, DF_ISOPNITB, DF_NH3, DF_NH4, DF_NO, DF_NO2, DF_NOA, DF_O3, DF_ONITR, DF_PAN, DF_TERPNIT, DQSED, EFLX_LH_TOT, EFLX_LH_TOT_ICE, FISCCP1_COSP, FLUC, FSA, FSCSC, FSH_ICE, FSR_ICE, HCL, HNO3, ISOP, LNO_PROD, MEANCLDALB_ISCCP, MEANPTOP_ISCCP, MEG_BCARY, MEG_BIGALK, MEG_BIGENE, MEG_C2H4, MEG_C2H5OH, MEG_C2H6, MEG_C3H6, MEG_C3H8, MEG_CH2O, MEG_CH3CHO, MEG_CH3COCH3, MEG_CH3COOH, MEG_CH3OH, MEG_CO, MEG_HCN, MEG_HCOOH, MEG_ISOP, MEG_MTERP, MEG_TOLUENE, NH4, NH_50, NO, NO2, NO2_CLXF, NO2_SRF, O3S, O3_Loss, O3_Prod, O3_SRF, PAN, PR, PSIRS, QFLX_EVAP_TOT, QFLX_SNOW_DRAIN, QSNOFRZ, RAIN, RAIN_ICE, RELHUM100, RELHUM500, RELHUM850, SFBENZENE, SFBIGALK, SFBIGENE, SFC2H2, SFC
+'column', 
+
+cd /glade/u/home/cmip7/cases/testing/${casename}
+
+
+### user_nl_cam
+
+cat <<EOF> user_nl_cam
+mfilt               =       0,       5,     20,      40,   
+nhtfrq              =       0,     -24,     -6,      -3,      
+ndens               =       2,       2,      2,       2,      
+interpolate_output  =  .false.,  .false., .false.,  .false.
+
+empty_htapes = .true.
+fincl1 = 'ACTNL', 'ACTREL', 'AODABSdn', 'AODBCdn', 'AODPOMdn', 'AODSO4dn', 'AODSOAdn', 'AODSS', 'AODVISdn', 'AREA', 'AREI', 'AREL', 'bc_a1', 'bc_a1DDF', 'bc_a1SFWET', 'bc_a4', 'bc_a4DDF', 'bc_a4SFWET', 'bc_c1DDF', 'bc_c1SFWET', 'bc_c4DDF', 'bc_c4SFWET', 'BURDENSO4dn', 'BUTGWSPEC', 'CDNUMC', 'CH4', 'CH4_CHML', 'CLDICE', 'CLDLIQ', 'CLDTOT', 'CLOUD', 'CME', 'CMFMC', 'CO2',  'CONCLD', 'DF_SO2', 'DMS', 'dst_a1', 'dst_a1DDF', 'dst_a1SFWET', 'dst_a2', 'dst_a2DDF', 'dst_a2SFWET', 'dst_a3', 'dst_a3DDF', 'dst_a3SFWET', 'dst_c1DDF', 'dst_c1SFWET', 'dst_c2DDF', 'dst_c2SFWET', 'dst_c3DDF', 'dst_c3SFWET', 'DTCORE', 'EVAPPREC', 'EVAPQZM', 'EVAPTZM', 'FCTL', 'FLDS', 'FLDSC', 'FLNS', 'FLNT', 'FLUT', 'FLUTC', 'FREQI', 'FREQL', 'FREQZM', 'FSDS', 'FSDSC', 'FSNS', 'FSNSC', 'FSNT', 'FSNTOA', 'FSNTOAC', 'FSUTOA', 'HO2', 'KVH_CLUBB', 'LHFLX', 'MASS', 'N2O', 'N2O_CHML', 'ncl_a1', 'ncl_a1DDF', 'ncl_a1SFWET', 'ncl_a2', 'ncl_a2DDF', 'ncl_a2SFWET', 'ncl_a3', 'ncl_a3DDF', 'ncl_c1', 'ncl_c1DDF', 'ncl_c1SFWET', 'ncl_c2', 'ncl_c2DDF', 'ncl_c2SFWET', 'ncl_c3', 'ncl_c3DDF', 'ncl_c3SFWET', 'NOY', 'num_a1', 'num_a2', 'num_a3', 'num_a4', 'NUMLIQ', 'O3', 'OH', 'OMEGA', 'PBLH', 'PM25', 'PM25_SRF', 'pom_a1', 'pom_a1DDF', 'pom_a1SFWET', 'pom_a4', 'pom_a4DDF', 'pom_a4SFWET', 'pom_c1DDF', 'pom_c1SFWET', 'pom_c4DDF', 'pom_c4SFWET', 'PRECC', 'PRECT', 'PS', 'PSL', 'PTEQ', 'PTTEND', 'Q', 'QAP', 'QFLX', 'QREFHT', 'QRL', 'QRLC', 'QRS', 'QRSC', 'QSNOW', 'RELHUM', 'RHREFHT', 'SFbc_a4', 'SFDMS', 'SFdst_a1', 'SFdst_a2', 'SFdst_a3', 'SFncl_a1', 'SFncl_a2', 'SFncl_a3', 'SFpom_a4', 'SFSO2', 'SFso4_a1', 'SFso4_a2', 'SHFLX', 'SO2', 'SO2_CLXF', 'so4_a1', 'so4_a1_CLXF', 'so4_a1DDF', 'so4_a1_sfgaex1', 'so4_a1SFWET', 'so4_a2', 'so4_a2_CLXF', 'so4_a2DDF', 'so4_a2_sfgaex1', 'so4_a2SFWET', 'so4_a3', 'so4_a3DDF', 'so4_a3_sfgaex1', 'so4_a3SFWET', 'so4_c1AQH2SO4', 'so4_c1AQSO4', 'so4_c1DDF', 'so4_c1SFWET', 'so4_c2AQH2SO4', 'so4_c2AQSO4', 'so4_c2DDF', 'so4_c2SFWET', 'so4_c3AQH2SO4', 'so4_c3AQSO4', 'so4_c3DDF', 'so4_c3SFWET', 'soa_a1DDF', 'soa_a1_sfgaex1', 'soa_a1SFWET', 'soa_a2DDF', 'soa_a2_sfgaex1', 'soa_a2SFWET', 'soa_c1DDF', 'soa_c1SFWET', 'soa_c2DDF', 'soa_c2SFWET', 'SOLIN', 'SOLLD', 'SOLSD', 'T', 'TAQ', 'TAUBLJX', 'TAUBLJY', 'TAUGWX', 'TAUGWY', 'TAUX', 'TAUY', 'TGCLDIWP', 'TGCLDLWP', 'TMQ', 'TOT_CLD_VISTAU', 'TREFHT', 'TREFHTMN', 'TREFHTMX', 'TROP_P', 'TROP_T', 'TROP_Z', 'TS', 'TTEND_TOT', 'TTGWORO', 'TTGWSPEC', 'U', 'U10', 'UTGWORO', 'UTGWSPEC', 'V', 'VD01', 'WD_SO2', 'Z3', 'ZMDQ', 'ZMDT', 'ZMMTT', 'ZMMU'
+! daily
+fincl2 = 'ACTNL', 'ACTREL', 'AODVISdn', 'bc_a1', 'bc_a4', 'BURDENBCdn', 'BURDENDUSTdn', 'BURDENPOMdn', 'BURDENSEASALTdn', 'BURDENSO4dn', 'BURDENSOAdn', 'BUTGWSPEC', 'CDNUMC', 'CLDICE', 'CLDLIQ', 'CLDTOT', 'CLOUD', 'OMEGA', 'OMEGA500', 'PM25_SRF', 'pom_a1', 'pom_a4', 'PRECC', 'PRECT', 'PS', 'PSL', 'PTTEND', 'Q', 'QFLX', 'QRL', 'QRS', 'QSNOW', 'RELHUM', 'RHREFHT', 'SHFLX', 'SO2', 'so4_a1', 'so4_a2', 'so4_a3', 'SOLIN', 'SOLLD', 'SOLSD', 'T', 'T700', 'T850', 'TAUBLJX', 'TAUBLJY', 'TAUGWX', 'TAUGWY', 'TAUX', 'TAUY', 'TGCLDIWP', 'TGCLDLWP', 'TMQ', 'TOT_CLD_VISTAU', 'TREFHT', 'TREFHTMN', 'TREFHTMX', 'TREFMNAV', 'TREFMXAV', 'TS', 'U', 'U10', 'UTGWORO', 'UTGWSPEC', 'V', 'Z1000', 'Z3', 'Z500', 'ZMFLXSNW'
+! 6 hourly
+fincl3 = 'FLDS', 'FSDS', 'PRECT', 'PSL', 'PS', 'QREFHT', 'RHREFHT', 'TMQ', 'TREFHT', 'TS', 'U', 'U10', 'V', 'Z1000', 'Z3', 'Z500', 'Z700', 'PRECTMX', 'Q'
+! 3 hourly
+fincl4 = 'QREFHT', 'PRECT', 'PS', 'FLDS', 'FSDS', 'TREFHT', 'RHREFHT', 'num_a1', 'num_a2', 'num_a3', 'num_a4', 'bc_a1', 'bc_a4', 'dst_a1', 'dst_a2', 'dst_a3', 'pom_a1', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', 'ncl_a1', 'ncl_a2', 'ncl_a3', 'ncl_c1', 'ncl_c2', 'ncl_c3', 'SO2', 'U10'
+
+EOF
+
+
+cd /glade/u/home/cmip7/cases/testing/${casename}
+
+cat <<EOF> user_nl_clm
+reseed_dead_plants = .true.
+EOF
+
+
+cat <<EOF> user_nl_cpl
+histaux_l2x1yrg = .true.
+EOF
+
+
+cd /glade/u/home/cmip7/cases/testing/${casename}  
+cat <<EOF> user_nl_cice
+EOF
+
+cd /glade/u/home/cmip7/cases/testing/${casename}
+cat <<EOF> user_nl_mom
+MAXTRUNC=1000
+EOF
+
+
+cd /glade/u/home/cmip7/cases/testing/${casename}
+./preview_namelists
+
+
+########################
+## build and submit
+########################
+
+cd /glade/u/home/cmip7/cases/testing/${casename}
+./xmlchange JOB_PRIORITY=premium
+./xmlchange PROJECT=CESM0024,RESUBMIT=0,STOP_N=3,STOP_OPTION=ndays
+./xmlchange PROJECT=CESM0024,RESUBMIT=2,STOP_N=4,STOP_OPTION=nyears
+./xmlchange REST_OPTION=nyears,REST_N=1
+./xmlchange JOB_WALLCLOCK_TIME=12:00:00  --subgroup case.run
+qcmd -A CESM0024 -- ./case.build
+./case.submit
+
