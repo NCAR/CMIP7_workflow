@@ -252,20 +252,6 @@ fi
 #Add the other stuff
 cat <<EOF>> user_nl_cam
 
-!phys_grid_ctem_nfreq=-6
-!phys_grid_ctem_zm_nbas=120
-!phys_grid_ctem_za_nlat=90
-
-seasalt_emis_scale = 1.6
-clubb_c8 = 4.6
-cldfrc_dp1 =  0.1
-dust_emis_fact = 3.2
-micro_mg_vtrmi_factor = 1.2
-zmconv_c0_lnd = 0.0035D0
-micro_mg_dcs = 500.D-6
-microp_aero_wsub_scale = 0.8
-
-se_statefreq = 144
 
 &prescribed_ozone_nl
  prescribed_ozone_cycle_yr              =    1850
@@ -322,34 +308,7 @@ fi
 ########################
 
 cat <<EOF> user_nl_mom
-INPUTDIR = "/glade/derecho/scratch/gmarques/g.e30_a07g.GW1850MARBL_JRA.TL319_t232_wgx3_hycom1_N75.2025.152/run/INPUT"
-MEKE_GEOMETRIC_ALPHA = 0.07
-SMAGORINSKY_KH = False
-MAXTRUNC = 1.0E6
 
-! Leith+E Settings
-TAPER_LEITHY = True
-LEITH_BI_CONST = 85.0
-LEITHY_CK = 1.0
-LEITHY_DEPTH = 1000.0
-LEITHY_WIDTH = 500.0
-
-! Background KH
-USE_KH_BG_2D = True
-KH_BG_2D_FILENAME = "KH_BG_2D.nc"
-KH_BG_2D_VARNAME = "KH"
-
-! Resolution scaling:
-!! GM & Redi the same
-!! Don't apply scaling to Laplacian viscosity, which is the 2D background
-RESOLN_SCALED_KH = False
-RESOLN_SCALED_KHTH = True  ! Already using, here for clarity
-RESOLN_SCALED_KHTR = True  ! Already using, here for clarity
-KH_RES_SCALE_COEF = 0.5    ! Tighter around the equator
-KH_RES_FN_POWER = 6        ! Already using, here for clarity
-VISC_RES_SCALE_COEF = 0.5  ! Used for KHTR
-VISC_RES_FN_POWER = 6      ! Used for KHTR
-INTERPOLATE_RES_FN = True  ! Only computes resolution fn once, then interpolates
 EOF
 
 

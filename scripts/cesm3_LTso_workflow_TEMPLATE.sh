@@ -16,7 +16,7 @@ useresoln=ne30_t232_wgx3
 
 git_repo=git@github.com:NCAR/cesm_dev.git
 
-CASENAME=b.e30_${cesmtag:(-8)}.${compset}.${useresoln}.cmip7-testing.007
+CASENAME=b.e30_${cesmtag:(-8)}.${compset}.${useresoln}.cmip7-testing.008
 
 echo "creating $CASENAME"
 
@@ -38,6 +38,7 @@ if [ "${USER}" == "cmip7" ]; then
     ########################
     ## connected as cmip7 user
     ########################
+     echo $'\n----- USER == CMIP7 -----\n'
      echo $'\n----- Setting CMIP7 user defaults -----\n'
      do_git_archive=true
      do_download_code=true
@@ -58,9 +59,9 @@ else
     do_download_code=true
     do_create_newcase=true
     do_case_setup=true
-    do_case_build=false
+    do_case_build=true
     do_case_submit=false
-    do_tseries=true
+    do_tseries=false
     do_cupid=false
     do_cmor=false
     casedir=$SCRATCH/workflow_testcase/
